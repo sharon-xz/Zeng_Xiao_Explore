@@ -1,6 +1,6 @@
 library(plyr)
 data(diamonds) #for testing purpose
-
+#explore(diamonds,'off', 0.2,c(20,30))
 explore <- function(dataframe, switch, cutoff_value, bin_value){
   #This function accept any dataframe as a parameter and returns a list of related statistical information about this dataframe. 
   #Parameters: A dataframe, a switch value(on, off, grid), a cutoff_value for correlations, a list of bin_values
@@ -12,6 +12,8 @@ explore <- function(dataframe, switch, cutoff_value, bin_value){
   explore_list$summary_column <- summary_table(dataframe)
   
   explore_list$r_squared <- rsquare(dataframe)
+  
+  explore_list$correlation <- correlation(dataframe ,cutoff_value)
   
   
   if(missing(bin_value)){
@@ -110,8 +112,9 @@ correlation <- function(dataframe,cutoff_value){
       c <- cor(columns, method = "pearson")
       
       correlation <- c[which(lower.tri(c))] 
-      
-      result <- data.frame(pairs, correlation) #Combine both columns
+      correlation <- sapply(correlation, function(x) ifelse(x > cutoff_value, x, 'Less than Threshold'))
+      result <- data.frame(pairs, correlation) #Combining both columns
+      names(result)<-c("Variable Pairs", "Pearson Exceeds Threshold")
       return(result)
       
     }
@@ -145,7 +148,7 @@ plots <- function(dataframe, switch, bin_value){
   }
 
 
-  result<-list(graph1,graph2,graph)
+  result<-list(graph1,graph)
   return(result)
 }
 
