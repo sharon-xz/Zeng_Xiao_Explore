@@ -1,10 +1,14 @@
 library(plyr)
+
 data(diamonds) #for testing purpose
 #explore(diamonds,'off', 0.2,c(20,30))
 explore <- function(dataframe, switch, cutoff_value, bin_value){
   #This function accept any dataframe as a parameter and returns a list of related statistical information about this dataframe. 
   #Parameters: A dataframe, a switch value(on, off, grid), a cutoff_value for correlations, a list of bin_values
   #Returns: A list of statistics and plots
+  
+  
+  if (is.data.frame(dataframe) = TRUE){ #Checking if the input is a dataframe
   
   explore_list <- list("explore") #Initiation of a list
   explore_list$frequency_table <- frequency_table(dataframe) 
@@ -23,13 +27,21 @@ explore <- function(dataframe, switch, cutoff_value, bin_value){
     
   }
   else{
-    if (switch == "on" || switch == "grid"){
-      explore_list$plots <- plots(dataframe, switch, bin_value)
+    if (is.list(bin_value)){ #Checking if the bin value is a valid list
+      if (switch == "on" || switch == "grid"){
+        explore_list$plots <- plots(dataframe, switch, bin_value)
+      }
+    }
+    else{
+      return("Please input a valid bin value")
     }
   }
   as.list(explore_list) #Making a list
   
-  return(explore_list)
+  return(explore_list)}
+  else{
+    return("Please input a valid dataframe")
+  }
 }
 
 frequency_table <- function(dataframe){
@@ -124,31 +136,50 @@ correlation <- function(dataframe,cutoff_value){
 
 
 plots <- function(dataframe, switch, bin_value){
+  
   #This function accept any dataframe as a parameter and returns a pair of blue histograms with a vertical red line at the mean 
   #Parameters: A dataframe, a switch value(on, off, grid), a list of bin_values
   #Returns: A dataframe
-
+  graph1 = list('Density')
+  graph2 = list('Count')
+  graph = list("categorical & binary")
+  h <- 1
+  
   for (i in (1:ncol(diamonds))){
     j <- diamonds[,i]  #every column
     if (is.numeric(j)==TRUE){ #For numeric columns
+      h <- h+1
       if(missing(bin_value)){ #For missing values
-        graph1 <- ggplot(dataframe,aes(j)) +geom_histogram(fill = 'blue') 
+        
+        graph1[h+1] <- ggplot(dataframe,aes(j)) +geom_density(fill = 'blue')+abline(v=mean(j),col = "red")
+        
+        graph2[h+1] <- ggplot(dataframe,aes(j)) +geom_histogram(fill = 'blue') +abline(v=mean(j),col = "red")
       }
       else{
+        
         for (k in bin_value){
-          graph1 <- ggplot(dataframe,aes(j)) +geom_histogram(binwidth = k,fill = 'blue') 
+          graph1[h+1] <- ggplot(dataframe,aes(j)) +stat_density(bw =k, fill = 'blue')+abline(v=mean(j),col = "red")
+          graph2[h+1] <- ggplot(dataframe,aes(j)) +geom_histogram(binwidth = k,fill = 'blue')+abline(v=mean(j),col = "red")
         }
       }
       
     }
     else{#For non numeric columns
-      graph<-ggplot(dataframe,aes(j)) +stat_count()
+      h <- h+1
+      graph[h+1]<-ggplot(dataframe,aes(j)) +stat_count()
       
     }
   }
+  if (switch=='grid'){
+    for (k in bin_value){
+      graph_grid1 <- ggplot(dataframe,aes(j)) +stat_density(bw =k, fill = 'blue')+abline(v=mean(j),col = "red")
+      graph_grid2 <- ggplot(dataframe,aes(j)) +geom_histogram(binwidth = k,fill = 'blue')+abline(v=mean(j),col = "red")
+      plot_grid(graph_grid1,graph_grid2)
+    }
+  }
 
-
-  result<-list(graph1,graph)
+ 
+  result<-list(graph1,graph2,graph)
   return(result)
 }
 
