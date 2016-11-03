@@ -20,7 +20,7 @@ explore <- function(dataframe, switch, cutoff_value, bin_value){
   explore_list$correlation <- correlation(dataframe ,cutoff_value)
   
   
-  if(missing(bin_value)){
+  if(missing(bin_value)){ #if the user does not provide the list of bin values
     if (switch == "on" || switch == "grid"){
       explore_list$plots <- plots(dataframe, switch)
     }
@@ -124,7 +124,7 @@ correlation <- function(dataframe,cutoff_value){
       c <- cor(columns, method = "pearson")
       
       correlation <- c[which(lower.tri(c))] 
-      correlation <- sapply(correlation, function(x) ifelse(x > cutoff_value, x, 'Less than Threshold'))
+      correlation <- sapply(correlation, function(x) ifelse(x > cutoff_value, x, 'Less than Threshold')) #Replacing values that are less than the threshold with error message
       result <- data.frame(pairs, correlation) #Combining both columns
       names(result)<-c("Variable Pairs", "Pearson Exceeds Threshold")
       return(result)
@@ -139,10 +139,8 @@ plots <- function(dataframe, switch, bin_value){
   
   #This function accept any dataframe as a parameter and returns a pair of blue histograms with a vertical red line at the mean 
   #Parameters: A dataframe, a switch value(on, off, grid), a list of bin_values
-  #Returns: A dataframe
-  graph1 = list('Density')
-  graph2 = list('Count')
-  graph = list("categorical & binary")
+  #Returns: None, but the graphs are saved as pdfs. 
+  
   h <- 1
   
   for (i in (1:ncol(diamonds))){
@@ -150,37 +148,59 @@ plots <- function(dataframe, switch, bin_value){
     if (is.numeric(j)==TRUE){ #For numeric columns
       h <- h+1
       if(missing(bin_value)){ #For missing values
-        
-        graph1[h+1] <- ggplot(dataframe,aes(j)) +geom_density(fill = 'blue')+abline(v=mean(j),col = "red")
-        
-        graph2[h+1] <- ggplot(dataframe,aes(j)) +geom_histogram(fill = 'blue') +abline(v=mean(j),col = "red")
+        par(mfrow=c(2,1))
+        pdf(paste(colnames(j),".pdf"))
+        ggplot(dataframe,aes(j)) +geom_density(fill = 'blue') + abline(v=mean(j),col = "red") #Density graph without binwidth value
+        plot.new()
+        ggplot(dataframe,aes(j)) +geom_histogram(fill = 'blue') +abline(v=mean(j),col = "red") #Count graph without binwidth value
+        plot.new()
       }
       else{
         
         for (k in bin_value){
-          graph1[h+1] <- ggplot(dataframe,aes(j)) +stat_density(bw =k, fill = 'blue')+abline(v=mean(j),col = "red")
-          graph2[h+1] <- ggplot(dataframe,aes(j)) +geom_histogram(binwidth = k,fill = 'blue')+abline(v=mean(j),col = "red")
+          par(mfrow=c(2,1))
+          pdf(paste(h,".pdf"))
+          ggplot(dataframe,aes(j)) +stat_density(bw =k, fill = 'blue')+abline(v=mean(j),col = "red") #Density graph with binwidth value
+          plot.new()
+          ggplot(dataframe,aes(j)) +geom_histogram(binwidth = k,fill = 'blue')+abline(v=mean(j),col = "red") #Count graph with binwidth value
+          plot.new()
         }
       }
       
     }
     else{#For non numeric columns
       h <- h+1
-      graph[h+1]<-ggplot(dataframe,aes(j)) +stat_count()
+      pdf(paste(h,"_nonnumeric.pdf"))
+      ggplot(dataframe,aes(j)) +stat_count()
+      plot.new()
       
     }
   }
   if (switch=='grid'){
-    for (k in bin_value){
-      graph_grid1 <- ggplot(dataframe,aes(j)) +stat_density(bw =k, fill = 'blue')+abline(v=mean(j),col = "red")
-      graph_grid2 <- ggplot(dataframe,aes(j)) +geom_histogram(binwidth = k,fill = 'blue')+abline(v=mean(j),col = "red")
-      plot_grid(graph_grid1,graph_grid2)
+    l <- length(bin_value)
+    par(mfrow=c(l,1))
+    pdf(paste(h,"_gridD.pdf"))
+    for (k in bin_value){#Creating grid for density histogram
+      
+      ggplot(dataframe,aes(j)) +stat_density(bw =k, fill = 'blue')+abline(v=mean(j),col = "red")
+      plot.new()
+    
     }
+    plot.new()
+    l <- length(bin_value)
+    par(mfrow=c(l,1))
+    pdf(paste(h,"_gridD.pdf"))
+    for (k in bin_value){#Creating grid for count histogram
+      ggplot(dataframe,aes(j)) +geom_histogram(binwidth = k,fill = 'blue')+abline(v=mean(j),col = "red")
+      plot.new()
+      
+    }
+    plot.new()
   }
 
  
-  result<-list(graph1,graph2,graph)
-  return(result)
+  
+  return("The graphs have been saved")
 }
 
 
