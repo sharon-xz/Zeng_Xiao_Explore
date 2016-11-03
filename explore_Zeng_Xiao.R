@@ -1,7 +1,5 @@
 library(plyr)
 
-data(diamonds) #for testing purpose
-#explore(diamonds,'off', 0.2,c(20,30))
 explore <- function(dataframe, switch, cutoff_value, bin_value){
   #This function accept any dataframe as a parameter and returns a list of related statistical information about this dataframe. 
   #Parameters: A dataframe, a switch value(on, off, grid), a cutoff_value for correlations, a list of bin_values
@@ -148,22 +146,26 @@ plots <- function(dataframe, switch, bin_value){
     if (is.numeric(j)==TRUE){ #For numeric columns
       h <- h+1
       if(missing(bin_value)){ #For missing values
+        
         par(mfrow=c(2,1))
         pdf(paste(colnames(j),".pdf"))
+        plot.new()
         ggplot(dataframe,aes(j)) +geom_density(fill = 'blue') + abline(v=mean(j),col = "red") #Density graph without binwidth value
-        plot.new()
+        
         ggplot(dataframe,aes(j)) +geom_histogram(fill = 'blue') +abline(v=mean(j),col = "red") #Count graph without binwidth value
-        plot.new()
+        
       }
       else{
         
         for (k in bin_value){
+          plot.new()
           par(mfrow=c(2,1))
           pdf(paste(h,".pdf"))
+          plot.new()
           ggplot(dataframe,aes(j)) +stat_density(bw =k, fill = 'blue')+abline(v=mean(j),col = "red") #Density graph with binwidth value
-          plot.new()
+          
           ggplot(dataframe,aes(j)) +geom_histogram(binwidth = k,fill = 'blue')+abline(v=mean(j),col = "red") #Count graph with binwidth value
-          plot.new()
+          
         }
       }
       
@@ -171,15 +173,20 @@ plots <- function(dataframe, switch, bin_value){
     else{#For non numeric columns
       h <- h+1
       pdf(paste(h,"_nonnumeric.pdf"))
+      plot.new()
       ggplot(dataframe,aes(j)) +stat_count()
       plot.new()
       
     }
   }
-  if (switch=='grid'){
+  if(missing(bin_value)){}
+  else{
+   if (switch=='grid'){
+    
     l <- length(bin_value)
     par(mfrow=c(l,1))
     pdf(paste(h,"_gridD.pdf"))
+    plot.new()
     for (k in bin_value){#Creating grid for density histogram
       
       ggplot(dataframe,aes(j)) +stat_density(bw =k, fill = 'blue')+abline(v=mean(j),col = "red")
@@ -190,19 +197,20 @@ plots <- function(dataframe, switch, bin_value){
     l <- length(bin_value)
     par(mfrow=c(l,1))
     pdf(paste(h,"_gridD.pdf"))
+    plot.new()
     for (k in bin_value){#Creating grid for count histogram
       ggplot(dataframe,aes(j)) +geom_histogram(binwidth = k,fill = 'blue')+abline(v=mean(j),col = "red")
       plot.new()
       
     }
     plot.new()
+   }
   }
 
  
   
   return("The graphs have been saved")
 }
-
 
 
 
