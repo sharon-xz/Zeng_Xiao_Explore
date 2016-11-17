@@ -82,7 +82,9 @@ rsquare <- function(dataframe){
   
   name_pairs <- cbind()  #Initiation
   rsquare <- cbind()
-  
+  ##Prof G - Calling out diamonds specifically here
+  ##Prof G - makes the code non-generalized and
+  ##Prof G - specific only to diamonds
   for (i in (1:ncol(dataframe))){
     name1 = names(diamonds)[i]  #getting the first column name
     
