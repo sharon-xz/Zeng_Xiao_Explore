@@ -1,47 +1,54 @@
 library(plyr)
+library(ggplot2)
 
 explore <- function(dataframe, switch, cutoff_value, bin_value){
-  #This function accept any dataframe as a parameter and returns a list of related statistical information about this dataframe. 
+  #This function accepts any dataframe as a parameter and returns a list of related statistical information about this dataframe. 
+  
   #Parameters: A dataframe, a switch value(on, off, grid), a cutoff_value for correlations, a list of bin_values
+  
   #Returns: A list of statistics and plots
   
   
-  if (is.data.frame(dataframe) = TRUE){ #Checking if the input is a dataframe
+  if (is.data.frame(dataframe) == TRUE){ #Checking if the input is a dataframe
   
-  explore_list <- list("explore") #Initiation of a list
-  explore_list$frequency_table <- frequency_table(dataframe) 
+    explore_list <- list("explore") #Initiation of a list
+    explore_list$frequency_table <- frequency_table(dataframe) 
   
-  explore_list$summary_column <- summary_table(dataframe)
+    explore_list$summary_column <- summary_table(dataframe)
   
-  explore_list$r_squared <- rsquare(dataframe)
+    explore_list$r_squared <- rsquare(dataframe)
   
-  explore_list$correlation <- correlation(dataframe ,cutoff_value)
+    explore_list$correlation <- correlation(dataframe ,cutoff_value)
   
   
-  if(missing(bin_value)){ #if the user does not provide the list of bin values
-    if (switch == "on" || switch == "grid"){
-      explore_list$plots <- plots(dataframe, switch)
-    }
-    
-  }
-  else{
-    if (is.list(bin_value)){ #Checking if the bin value is a valid list
+    if(missing(bin_value)){ #if the user does not provide the list of bin values
       if (switch == "on" || switch == "grid"){
-        explore_list$plots <- plots(dataframe, switch, bin_value)
-      }
+        explore_list$plots <- plots(dataframe, switch)}
     }
-    else{
-      return("Please input a valid bin value")
-    }
-  }
-  as.list(explore_list) #Making a list
+      
   
-  return(explore_list)}
-  else{
-    return("Please input a valid dataframe")
+    
+    else{ #if the user has provided a list of bin values
+      if (is.list(bin_value)){ #Checking if the bin value is a valid list
+        if (switch == "on" || switch == "grid"){
+          explore_list$plots <- plots(dataframe, switch, bin_value)
+        }
+      }
+  
+     else{ #if the bin value is not a valid list
+         return("Please input a valid bin value")}
+    }
+      
+   
+   as.list(explore_list) #Making a list
+  
+   return(explore_list)
   }
+  if (is.data.frame(dataframe) == FALSE){ #If the dataframe is not valid, asking the user to input a valid dataframe
+    return("Please input a valid dataframe")}
+  
+   
 }
-
 frequency_table <- function(dataframe){
   #This function accept any dataframe as a parameter and returns a frequency table for every categorical and logical variable
   #Parameters: A dataframe
@@ -126,7 +133,7 @@ correlation <- function(dataframe,cutoff_value){
       result <- data.frame(pairs, correlation) #Combining both columns
       names(result)<-c("Variable Pairs", "Pearson Exceeds Threshold")
       return(result)
-      
+      #r[which(abs(r) > t)]
     }
     else  #if we can't find Pearson correlation
       print("Pearson Correlation cannot be computted because there are not enough numeric columns")
@@ -134,6 +141,8 @@ correlation <- function(dataframe,cutoff_value){
 
 
 plots <- function(dataframe, switch, bin_value){
+  #ps="off"
+  #gird.arrange
   
   #This function accept any dataframe as a parameter and returns a pair of blue histograms with a vertical red line at the mean 
   #Parameters: A dataframe, a switch value(on, off, grid), a list of bin_values
@@ -206,9 +215,6 @@ plots <- function(dataframe, switch, bin_value){
     plot.new()
    }
   }
-
- 
-  
   return("The graphs have been saved")
 }
 
