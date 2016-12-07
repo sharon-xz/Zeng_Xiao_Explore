@@ -1,5 +1,6 @@
 library(plyr)
 library(ggplot2)
+library(grid)
 
 explore <- function(dataframe, switch, cutoff_value, bin_value){
   #This function accepts any dataframe as a parameter and returns a list of related statistical information about this dataframe. 
@@ -36,7 +37,7 @@ explore <- function(dataframe, switch, cutoff_value, bin_value){
       }
   
      else{ #if the bin value is not a valid list
-         return("Please input a valid bin value")}
+         return("Please input a valid bin value as a list of values")}
     }
       
    
@@ -47,7 +48,6 @@ explore <- function(dataframe, switch, cutoff_value, bin_value){
   if (is.data.frame(dataframe) == FALSE){ #If the dataframe is not valid, asking the user to input a valid dataframe
     return("Please input a valid dataframe")}
   
-   
 }
 frequency_table <- function(dataframe){
   #This function accept any dataframe as a parameter and returns a frequency table for every categorical and logical variable
@@ -92,7 +92,7 @@ rsquare <- function(dataframe){
             
             }
           else{
-            rsquare<- rbind(rsquare, NA)  #for non-numeric columns, the r-squared is NA to avoid errors
+             rsquare<- rbind(rsquare, NA)  #for non-numeric columns, the r-squared is NA to avoid errors
           }}
         else{
           rsquare<- rbind(rsquare, NA)
@@ -219,4 +219,5 @@ plots <- function(dataframe, switch, bin_value){
 }
 
 
+explore(diamonds,'on',0.5)
 
