@@ -1,6 +1,7 @@
 library(plyr)
 library(ggplot2)
 library(grid)
+library(gridExtra)
 
 explore <- function(dataframe, switch, cutoff_value, bin_value){
   #This function accepts any dataframe as a parameter and returns a list of related statistical information about this dataframe. 
@@ -23,7 +24,7 @@ explore <- function(dataframe, switch, cutoff_value, bin_value){
   
   
     if(missing(bin_value)){ #if the user does not provide the list of bin values
-      if (switch == "on" || switch == "grid"){
+      if (switch == "on" || switch == "grid"){ #if the swicth is "on" or "grid", then we call the plots function
         explore_list$plots <- plots(dataframe, switch)}
     }
       
@@ -49,6 +50,9 @@ explore <- function(dataframe, switch, cutoff_value, bin_value){
     return("Please input a valid dataframe")}
   
 }
+
+
+
 frequency_table <- function(dataframe){
   #This function accept any dataframe as a parameter and returns a frequency table for every categorical and logical variable
   #Parameters: A dataframe
@@ -113,7 +117,7 @@ rsquare <- function(dataframe){
 correlation <- function(dataframe,cutoff_value){
     #This function accept any dataframe as a parameter and returns a dataframe that contains each pair of column names in the first column in a single string separated by a -, 
     #and their corresponding Pearson correlation coefficient in the second column.
-    #Parameters: A dataframe
+    #Parameters: A dataframe and a cutoff value
     #Returns: A dataframe
   
   
@@ -140,84 +144,77 @@ correlation <- function(dataframe,cutoff_value){
   }
 
 
+
+
 plots <- function(dataframe, switch, bin_value){
-  #ps="off"
-  #gird.arrange
+
   
-  #This function accept any dataframe as a parameter and returns a pair of blue histograms with a vertical red line at the mean 
+  #This function accept any dataframe as a parameter and returns a pair of blue histograms with a vertical red line at the mean for numerical coloums
+  #For non-numeric columns, a gray bar graph would be printed
+  
   #Parameters: A dataframe, a switch value(on, off, grid), a list of bin_values
-  #Returns: None, but the graphs are saved as pdfs. 
   
-  h <- 1
+  #Returns: None, but the graphs are printed on screen. 
+  
+  
   
   for (i in (1:ncol(diamonds))){
     j <- diamonds[,i]  #every column
     if (is.numeric(j)==TRUE){ #For numeric columns
-      h <- h+1
+      
       if(missing(bin_value)){ #For missing values
-        
-        par(mfrow=c(2,1))
-        pdf(paste(colnames(j),".pdf"))
-        plot.new()
-        ggplot(dataframe,aes(j)) +geom_density(fill = 'blue') + abline(v=mean(j),col = "red") #Density graph without binwidth value
-        
-        ggplot(dataframe,aes(j)) +geom_histogram(fill = 'blue') +abline(v=mean(j),col = "red") #Count graph without binwidth value
+
+        print(ggplot(dataframe,aes(j)) +geom_density(fill = 'blue') + abline(v=mean(j),col = "red")) #Density graph without binwidth value
+        print(ggplot(dataframe,aes(j)) +geom_histogram(fill = 'blue') +abline(v=mean(j),col = "red") )#Count graph without binwidth value
         
       }
       else{
         
         for (k in bin_value){
-          plot.new()
-          par(mfrow=c(2,1))
-          pdf(paste(h,".pdf"))
-          plot.new()
-          ggplot(dataframe,aes(j)) +stat_density(bw =k, fill = 'blue')+abline(v=mean(j),col = "red") #Density graph with binwidth value
-          
-          ggplot(dataframe,aes(j)) +geom_histogram(binwidth = k,fill = 'blue')+abline(v=mean(j),col = "red") #Count graph with binwidth value
+          print(ggplot(dataframe,aes(j)) +stat_density(bw =k, fill = 'blue')+abline(v=mean(j),col = "red")) #Density graph with binwidth value
+          print(ggplot(dataframe,aes(j)) +geom_histogram(binwidth = k,fill = 'blue')+abline(v=mean(j),col = "red")) #Count graph with binwidth value
           
         }
       }
       
     }
-    else{#For non numeric columns
-      h <- h+1
-      pdf(paste(h,"_nonnumeric.pdf"))
-      plot.new()
-      ggplot(dataframe,aes(j)) +stat_count()
-      plot.new()
+    else{#For non numeric columns,plot a gray bar graph
+     
+      
+      print(ggplot(dataframe,aes(j)) +stat_count())
+      
       
     }
   }
   if(missing(bin_value)){}
-  else{
-   if (switch=='grid'){
-    
-    l <- length(bin_value)
-    par(mfrow=c(l,1))
-    pdf(paste(h,"_gridD.pdf"))
-    plot.new()
-    for (k in bin_value){#Creating grid for density histogram
-      
-      ggplot(dataframe,aes(j)) +stat_density(bw =k, fill = 'blue')+abline(v=mean(j),col = "red")
-      plot.new()
-    
-    }
-    plot.new()
-    l <- length(bin_value)
-    par(mfrow=c(l,1))
-    pdf(paste(h,"_gridD.pdf"))
-    plot.new()
-    for (k in bin_value){#Creating grid for count histogram
-      ggplot(dataframe,aes(j)) +geom_histogram(binwidth = k,fill = 'blue')+abline(v=mean(j),col = "red")
+  else{  #For the griding part
+    if (switch=='grid'){
       plot.new()
       
+      l <- length(bin_value)
+      
+      for (k in bin_value){#Creating grid for density histogram
+        
+        figure1<-ggplot(dataframe,aes(j)) +stat_density(bw =k, fill = 'blue')+abline(v=mean(j),col = "red")}
+      
+      
+      
+      
+      l <- length(bin_value)
+      
+      for (k in bin_value){#Creating grid for count histogram
+        figure2<-ggplot(dataframe,aes(j)) +geom_histogram(binwidth = k,fill = 'blue')+abline(v=mean(j),col = "red")
+        
+        
+      }
+      
+      print(grid.arrange(figure1,figure2)) #Putting the graphs in one graph
     }
-    plot.new()
-   }
   }
-  return("The graphs have been saved")
+  return("All the graphs are printed on screen")
 }
 
 
-explore(diamonds,'on',0.5)
+bv = list(10,20,30)
+explore(diamonds,'on',0.5, bv)
 
