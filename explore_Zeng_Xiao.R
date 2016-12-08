@@ -1,3 +1,7 @@
+#HW 7&8 Resubmission
+#Please see HW8 at the branch "hw8"
+#Xiao Zeng
+
 library(plyr)
 library(ggplot2)
 library(grid)
