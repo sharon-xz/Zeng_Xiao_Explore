@@ -35,6 +35,8 @@ explore <- function(dataframe, switch, cutoff_value, bin_value){
   
     
     else{ #if the user has provided a list of bin values
+      ##Prof G - Expect to provide a vector of bin values
+      ##Prof G - not a list.
       if (is.list(bin_value)){ #Checking if the bin value is a valid list
         if (switch == "on" || switch == "grid"){
           explore_list$plots <- plots(dataframe, switch, bin_value)
